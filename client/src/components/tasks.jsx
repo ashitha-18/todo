@@ -5,15 +5,19 @@ function Tasks() {
     const [tasks, setTasks] = useState([]);
     const [newTask, setNewTask] = useState('');
     const userId = localStorage.getItem('userId');
+    const projectId = localStorage.getItem('projectId');
+
    
     useEffect(() => {
-        axios.get(`http://localhost:3000/tasks?userId=${userId}` )
-            .then(response => setTasks(response.data))
+        axios.get(`http://localhost:3000/tasks?userId=${userId}&projectId=${projectId}`)
+            .then(response => {
+                setTasks(response.data);
+            })
             .catch(error => console.log(error));
     }, [userId, tasks]);
 
     const handleAddTask = () => {
-        axios.post(`http://localhost:3000/tasks`, { userId: userId, text: newTask })
+        axios.post(`http://localhost:3000/tasks`, { userId: userId, projectId: projectId,  text: newTask })
             .then(response => {
                 setTasks(prevTasks => [...prevTasks, response.data]);
                 setNewTask('');
@@ -23,25 +27,26 @@ function Tasks() {
             });
     };
 
-const handleUpdateTask = (taskId, newText, newCompleted) => {
-    axios.put(`http://localhost:3000/tasks`, { userId: userId, taskId , text: newText, completed: newCompleted })
-        .then(response => {
-            setTasks(response.data.tasks);
-        })
-        .catch(error => {
-            console.error('Error updating task:', error);
-        });
-};
+    const handleUpdateTask = (taskId, newText) => {
+        axios.put(`http://localhost:3000/tasks`, { userId, projectId, taskId, text: newText })
+            .then(response => {
+                setTasks(response.data.todos);
+            })
+            .catch(error => {
+                console.error('Error updating task:', error);
+            });
+    };
 
-const handleDeleteTask = (taskId) => {
-    axios.delete(`http://localhost:3000/tasks?userId=${userId}&taskId=${taskId}`)
-        .then(response => {
-            setTasks(response.data.tasks);
-        })
-        .catch(error => {
-            console.error('Error deleting task:', error);
-        });
-};
+
+   const handleDeleteTask = (taskId) => {
+        axios.delete(`http://localhost:3000/tasks?userId=${userId}&projectId=${projectId}&taskId=${taskId}`)
+            .then(response => {
+                setTasks(response.data.todos);
+            })
+            .catch(error => {
+                console.error('Error deleting task:', error);
+            });
+    };
 
     
 

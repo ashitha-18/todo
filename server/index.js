@@ -3,7 +3,7 @@ const mongoose = require("mongoose")
 const cors = require("cors")
 require('dotenv').config();
 
-const { UserModel } = require('./models/user')
+const { UserModel, ProjectModel } = require('./models/user')
 
 const app = express()
 app.use(express.json())
@@ -38,29 +38,27 @@ app.post('/signup', (req,res) => {
 
 //to do list
 
-app.post('/tasks', (req, res) => {
-    const { userId, text } = req.body;
-
+app.post('/projects', (req, res) => {
+    const { userId, title } = req.body;
     UserModel.findById(userId)
-        .then(user => {
-            if (user) {
-                user.tasks.push({ text });
-                return user.save();
-            } else {
-                res.status(404).json("User not found");
-            }
-        })
-        .then(updatedUser => res.json(updatedUser))
-        .catch(err => res.status(500).json(err));
+    .then(user => {
+        if (user) {
+            user.projects.push({ title });
+            return user.save();
+        } else {
+            res.status(404).json("User not found");
+        }
+    })
+    .then(updatedUser => res.json(updatedUser))
+    .catch(err => res.status(500).json(err));
 });
 
-app.get('/tasks', (req, res) => {
+app.get('/projects', (req, res) => {
     const { userId } = req.query;
-
     UserModel.findById(userId)
         .then(user => {
             if (user) {
-                res.json(user.tasks);
+                res.json(user.projects);
             } else {
                 res.status(404).json("User not found");
             }
@@ -68,19 +66,20 @@ app.get('/tasks', (req, res) => {
         .catch(err => res.status(500).json(err));
 });
 
-app.put('/tasks', (req, res) => {
-    const { userId, taskId, text, completed } = req.body;
+app.post('/tasks', (req, res) => {
+    const { userId, projectId, text } = req.body;
 
     UserModel.findById(userId)
         .then(user => {
             if (user) {
-                const task = user.tasks.id(taskId);
-                if (task) {
-                    task.text = text !== undefined ? text : task.text;
-                    task.completed = completed !== undefined ? completed : task.completed;
-                    return user.save();
-                } else {
-                    res.status(404).json("Task not found");
+                const project = user.projects.id(projectId);
+                if (project) {
+                    const newTodo = { text };
+                project.todos.push(newTodo);
+                return user.save();
+                }
+                else{
+                    return res.status(404).json("Project not found");
                 }
             } else {
                 res.status(404).json("User not found");
@@ -90,18 +89,73 @@ app.put('/tasks', (req, res) => {
         .catch(err => res.status(500).json(err));
 });
 
-app.delete('/tasks', (req, res) => {
-    const { userId, taskId } = req.query;
+app.get('/tasks', (req, res) => {
+    const { userId, projectId } = req.query;
 
-    UserModel.findByIdAndUpdate(userId, { $pull: { tasks: { _id: taskId } } }, { new: true })
-        .then(updatedUser => {
-            if (!updatedUser) {
-                return res.status(404).json("User not found");
+    UserModel.findById(userId)
+        .then(user => {
+            if (user) {
+                const project = user.projects.id(projectId);
+                if(project){
+                    res.json(project.todos);
+                }
+                
+            } else {
+                res.status(404).json("User not found");
             }
-            res.json(updatedUser);
         })
         .catch(err => res.status(500).json(err));
 });
+
+app.put('/tasks', (req, res) => {
+    const { userId, projectId, taskId, text } = req.body;
+
+    UserModel.findOneAndUpdate(
+        { _id: userId, 'projects._id': projectId, 'projects.todos._id': taskId },
+        {
+            $set: {
+                'projects.$.todos.$[elem].text': text !== undefined ? text : undefined,
+                'projects.$.todos.$[elem].updatedDate': new Date()
+            }
+        },
+        {
+            arrayFilters: [{ 'elem._id': taskId }],
+            new: true
+        }
+    )
+    .then(updatedUser => {
+        if (!updatedUser) {
+            return res.status(404).json("User or Project not found");
+        }
+        const project = updatedUser.projects.id(projectId);
+        if (project) {
+            res.json(project.todos);
+        } else {
+            res.status(404).json("Project not found");
+        }
+    })
+    .catch(err => res.status(500).json(err));
+});
+
+
+app.delete('/tasks', (req, res) => {
+    const { userId, projectId, taskId } = req.query;
+
+    UserModel.findOneAndUpdate(
+        { _id: userId, 'projects._id': projectId },
+        { $pull: { 'projects.$.todos': { _id: taskId } } },
+        { new: true }
+    )
+    .then(updatedUser => {
+        if (!updatedUser) {
+            return res.status(404).json("User or Project not found");
+        }
+        res.json(updatedUser.projects.id(projectId).todos);
+    })
+    .catch(err => res.status(500).json(err));
+});
+
+
 
 app.listen(3000, () => {
     console.log("server is running")

@@ -15,7 +15,7 @@ function Login(){
             console.log(result)
             if (result.data.message === "success") {
                 localStorage.setItem('userId', result.data.userId);
-                navigate('/tasks');
+                navigate('/home');
             }
             
         })

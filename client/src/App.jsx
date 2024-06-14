@@ -3,6 +3,7 @@ import {BrowserRouter, Routes , Route} from 'react-router-dom'
 import Signup from './components/signup'
 import Login from './components/login'
 import Tasks from './components/tasks'
+import Home from './components/home'
 
 function App() {
 
@@ -13,6 +14,7 @@ function App() {
       <Route path='/' element = {<Signup/>}></Route>
       <Route path='/login' element = {<Login/>}></Route>
       <Route path='/tasks' element = {<Tasks/>}></Route>
+      <Route path='/home' element = {<Home/>}></Route>
     </Routes>
     </BrowserRouter>
   )
