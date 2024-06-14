@@ -7,6 +7,7 @@ function Tasks() {
     const [newTask, setNewTask] = useState('');
     const userId = localStorage.getItem('userId');
     const projectId = localStorage.getItem('projectId');
+    const projectTitle = localStorage.getItem('projectTitle');
 
    
     useEffect(() => {
@@ -63,7 +64,7 @@ function Tasks() {
     return (
         <div className="d-flex flex-column justify-content-center align-items-center vh-100" style={{ backgroundColor: '#FCF5ED'}}>
     <div className="p-4 rounded w-75" style={{ backgroundColor: '#F4BF96'}}>
-        <h2 className="text-center mb-4" style={{ color: '#CE5A67' }}>Tasks</h2>
+        <h2 className="text-center mb-4" style={{ color: '#CE5A67' }}>{projectTitle} Tasks </h2>
         <form onSubmit={handleAddTask} className="mb-4">
             <div className="input-group">
                 <input

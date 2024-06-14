@@ -27,9 +27,10 @@ function Home() {
             });
     };
 
-    const handleOpenProject = (projectId) => {
+    const handleOpenProject = (projectId, projectTitle) => {
         localStorage.setItem('userId', userId);
         localStorage.setItem('projectId', projectId);
+        localStorage.setItem('projectTitle', projectTitle);
         navigate('/tasks');
     };
 
@@ -55,7 +56,7 @@ function Home() {
                         <div key={project._id} className="col-12 col-sm-6 col-md-4 mt-4 mb-4 d-flex justify-content-center">
                             <button
                                 className="btn btn-primary w-50"
-                                onClick={() => handleOpenProject(project._id)}
+                                onClick={() => handleOpenProject(project._id, project.title)}
                                 style={{ backgroundColor: '#FCF5ED', borderColor: '#1F1717', fontSize: '1.2rem', height: '50px', color: '#1F1717' }}
                             >
                                 {project.title}
