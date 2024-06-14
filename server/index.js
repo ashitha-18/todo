@@ -108,13 +108,14 @@ app.get('/tasks', (req, res) => {
 });
 
 app.put('/tasks', (req, res) => {
-    const { userId, projectId, taskId, text } = req.body;
+    const { userId, projectId, taskId, text , completed} = req.body;
 
     UserModel.findOneAndUpdate(
         { _id: userId, 'projects._id': projectId, 'projects.todos._id': taskId },
         {
             $set: {
                 'projects.$.todos.$[elem].text': text !== undefined ? text : undefined,
+                'projects.$.todos.$[elem].completed': completed !== undefined ? completed : 'false',
                 'projects.$.todos.$[elem].updatedDate': new Date()
             }
         },

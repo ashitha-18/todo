@@ -8,7 +8,16 @@ const TaskSchema = new mongoose.Schema({
     completed: {
         type: Boolean,
         default: false
+    },
+    createdDate: {
+        type: Date,
+        default: Date.now
+    },
+    updatedDate: {
+        type: Date,
+        default: Date.now
     }
+
 });
 
 const ProjectSchema = new mongoose.Schema({

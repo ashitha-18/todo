@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import TaskItem from './taskItem';
 
 function Tasks() {
     const [tasks, setTasks] = useState([]);
@@ -28,7 +29,7 @@ function Tasks() {
     };
 
     const handleUpdateTask = (taskId, newText) => {
-        axios.put(`http://localhost:3000/tasks`, { userId, projectId, taskId, text: newText })
+        axios.put(`http://localhost:3000/tasks`, { userId, projectId, taskId, text: newText  })
             .then(response => {
                 setTasks(response.data.todos);
             })
@@ -37,6 +38,15 @@ function Tasks() {
             });
     };
 
+    const handleCompleteTask = (taskId, completed) => {
+        axios.put(`http://localhost:3000/tasks`, { userId, projectId, taskId, completed  })
+            .then(response => {
+                setTasks(response.data);
+            })
+            .catch(error => {
+                console.error('Error completing task:', error);
+            });
+    };
 
    const handleDeleteTask = (taskId) => {
         axios.delete(`http://localhost:3000/tasks?userId=${userId}&projectId=${projectId}&taskId=${taskId}`)
@@ -70,18 +80,20 @@ function Tasks() {
             {tasks.map(task => (
                 <li key={task._id} className="d-flex justify-content-between align-items-center mb-2">
                     <input
-                        type="text"
-                        value={task.text}
-                        className="form-control"
-                        onChange={(e) => handleUpdateTask(task._id, e.target.value)}
-                    />
+                                type="checkbox"
+                                checked={task.completed}
+                                onChange={(e) => handleCompleteTask(task._id, e.target.checked)}
+                                style={{transform: 'scale(1.5)'}}
+                            />
+                    <TaskItem task ={task} handleUpdateTask= {handleUpdateTask}/>
                     <button
-                        className="btn btn-danger m-2"
+                        className="btn btn-danger"
                         onClick={() => handleDeleteTask(task._id)}
                         style={{ backgroundColor: '#1F1717', borderColor: '#1F1717' }}
                     >
                         Delete
                     </button>
+
                 </li>
             ))}
         </ul>
